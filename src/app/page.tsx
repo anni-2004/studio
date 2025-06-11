@@ -1,4 +1,6 @@
 
+// Ensure this file is saved with a .tsx extension
+
 "use client"; // Add "use client" if not already present for useState/useEffect
 
 import { RegistrationWizard } from "@/components/tender-match-pro/registration-wizard";
