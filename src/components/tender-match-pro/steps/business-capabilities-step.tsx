@@ -218,6 +218,7 @@ export const BusinessCapabilitiesStep: FC<BusinessCapabilitiesStepProps> = ({ fo
               <FormControl>
                  <TagInput
                   {...field}
+                  value={field.value ?? ""}
                   options={CERTIFICATION_OPTIONS}
                   placeholder="Enter certification names..."
                   id="certifications"

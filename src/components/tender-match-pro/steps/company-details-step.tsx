@@ -156,11 +156,11 @@ export const CompanyDetailsStep: FC<CompanyDetailsStepProps> = ({ form }) => {
         setValue('companyDetails.dateOfEstablishment', date, { shouldValidate: true, shouldDirty: true });
       } else {
         // Set to an invalid value or undefined to trigger RHF validation
-        setValue('companyDetails.dateOfEstablishment', undefined, { shouldValidate: true, shouldDirty: true });
+        setValue('companyDetails.dateOfEstablishment', null, { shouldValidate: true, shouldDirty: true });
       }
     } else {
         // If any part is missing, set RHF field to undefined to ensure validation fires if field is required
-        setValue('companyDetails.dateOfEstablishment', undefined, { shouldValidate: true, shouldDirty: true });
+        setValue('companyDetails.dateOfEstablishment', null, { shouldValidate: true, shouldDirty: true });
     }
   }, [selectedDay, selectedMonth, selectedYear, setValue]);
 

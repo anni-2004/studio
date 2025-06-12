@@ -5,12 +5,27 @@ import { z } from 'zod';
 export const companyDetailsSchema = z.object({
   companyName: z.string().min(2, { message: "Company name must be at least 2 characters." }),
   companyType: z.string().min(1, { message: "Please select a company type." }),
-  dateOfEstablishment: z.date({
-    required_error: "Date of establishment is required.",
-    invalid_type_error: "That's not a valid date!",
-  })
-  .min(new Date("1800-01-01"), { message: "Date cannot be before January 1, 1800." })
-  .max(new Date(), { message: "Date cannot be in the future." }),
+  dateOfEstablishment: z
+  .union([
+    z.date(),
+    z.null()
+  ])
+  .superRefine((val, ctx) => {
+    if (val !== null) {
+      if (val < new Date("1800-01-01")) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Date cannot be before January 1, 1800.",
+        });
+      }
+      if (val > new Date()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Date cannot be in the future.",
+        });
+      }
+    }
+  }),
   country: z.string().min(2, { message: "Please select a country." }),
   state: z.string().min(2, { message: "Please select a state." }),
   city: z.string().min(2, { message: "Please enter a city." }),

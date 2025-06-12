@@ -74,7 +74,7 @@ export function RegistrationWizard() {
     companyDetails: {
       companyName: '',
       companyType: '',
-      dateOfEstablishment: undefined, // Changed from yearOfEstablishment
+      dateOfEstablishment: new Date(), // Changed from yearOfEstablishment
       country: '',
       state: '',
       city: '',
@@ -104,7 +104,7 @@ export function RegistrationWizard() {
       suppliedToGovtPsus: false,
       hasPastClients: false,
       pastClients: '',
-      highestOrderValueFulfilled: undefined,
+      highestOrderValueFulfilled: 0,
       tenderTypesHandled: ''
     },
     geographicDigitalReach: {
@@ -154,8 +154,9 @@ export function RegistrationWizard() {
 
 
   const handleNext = async () => {
+    console.log(currentStep, STEPS.length);
     if (currentStep < STEPS.length - 1) {
-      const currentStepFields = STEPS[currentStep].fields as (keyof RegistrationFormData)[];
+      const currentStepFields = STEPS[currentStep].fields.slice() as (keyof RegistrationFormData)[];
       
       const fieldsToValidate: (keyof RegistrationFormData)[] | (Path<RegistrationFormData>)[] = 
         STEPS[currentStep].id === 'termsAndConditions' ? ['termsAndConditions'] :
@@ -184,9 +185,11 @@ export function RegistrationWizard() {
           variant: "destructive",
         });
       }
-    } else {
-      // This is the final step, attempt to submit the whole form
-      await methods.handleSubmit(onSubmit)();
+    } 
+    else {
+      console.log("wroking")
+      console.log(methods.getValues());
+      await onSubmit(methods.getValues());
     }
   };
 
@@ -198,10 +201,42 @@ export function RegistrationWizard() {
 
   const onSubmit = async (data: RegistrationFormData) => {
     setIsSubmitting(true);
-    console.log("Form Submitted:", data);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    console.log("hello");
+    try {
+      console.log(data);
+    const response = await fetch(`http://127.0.0.1:8000/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      throw new Error(errorResponse.message || 'Failed to submit registration.');
+    }
+
+    toast({
+      title: "Profile Submitted!",
+      description: "Your company profile has been successfully submitted.",
+      className: "bg-green-500 text-white",
+    });
+
+    localStorage.removeItem(FORM_DATA_STORAGE_KEY);
+    localStorage.removeItem(CURRENT_STEP_STORAGE_KEY);
+    methods.reset(initialDefaultValues);
+    setCurrentStep(0);
+
+  } catch (error: any) {
+    toast({
+      title: "Submission Error",
+      description: error.message || "Something went wrong while submitting your profile.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
     setIsSubmitting(false);
     toast({
       title: "Profile Submitted!",
@@ -220,7 +255,7 @@ export function RegistrationWizard() {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8 w-full">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-8 w-full">
         <Progress value={progressValue} className="w-full mb-6 h-3" />
 
         <CurrentStepComponent form={methods} />
